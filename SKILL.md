@@ -18,7 +18,7 @@ When subagents are available:
 - Do not delegate a concise explanation, known one-line edit, or short indivisible operation merely to satisfy this skill.
 - Never forward the whole request unchanged to one worker.
 
-Read the platform adapter before dispatching: [Codex](references/codex.md) or [Claude Code](references/claude-code.md). If neither matches or tools are unavailable, record the reason and continue safely.
+Read the platform adapter before dispatching: [Codex](adapters/codex.md) or [Claude Code](adapters/claude-code.md). If neither matches or tools are unavailable, record the reason and continue safely.
 
 ## Lead workflow
 
