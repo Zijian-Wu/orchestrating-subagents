@@ -34,7 +34,6 @@ source_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 canonical="${AGENT_SKILLS_HOME:-$HOME/.local/share/agent-skills}/orchestrating-subagents"
 start='<!-- orchestrating-subagents:start -->'
 end='<!-- orchestrating-subagents:end -->'
-bootstrap='For every non-trivial coding task, invoke and follow the `orchestrating-subagents` skill before implementation. The main agent must remain responsible for orchestration, user communication, integration, verification, and final delivery.'
 
 say() { printf '%s\n' "$*"; }
 fail() { printf 'Error: %s\n' "$*" >&2; exit 1; }
@@ -102,22 +101,15 @@ link_skill() {
   ln -s "$canonical" "$target"
 }
 
-update_bootstrap() {
+validate_legacy_bootstrap() {
   file="$1"
-  if test "$dry_run" -eq 1; then
-    say "Would update marked bootstrap block in $file"
+  if test ! -e "$file" && test ! -L "$file"; then
     return
   fi
 
-  if test -L "$file"; then
-    fail "refusing to replace symlink-managed instruction file: $file"
-  fi
-
-  directory="$(dirname "$file")"
-  mkdir -p "$directory"
   start_count=0
   end_count=0
-  if test -f "$file"; then
+  if test -f "$file" || test -L "$file"; then
     start_count="$(grep -Fxc "$start" "$file" || true)"
     end_count="$(grep -Fxc "$end" "$file" || true)"
   fi
@@ -131,60 +123,61 @@ update_bootstrap() {
   ' "$file"; then
     fail "malformed orchestrating-subagents marker order in $file"
   fi
+  if test "$start_count" -eq 0; then
+    return
+  fi
+  if test -L "$file"; then
+    fail "refusing to remove legacy bootstrap block through symlink-managed instruction file: $file"
+  fi
+}
 
-  new="$(mktemp "$directory/.orchestrating-subagents.XXXXXX")"
-  if test -f "$file"; then
-    cp -p "$file" "$new"
-    input="$file"
-  else
-    input=/dev/null
+remove_legacy_bootstrap() {
+  file="$1"
+  validate_legacy_bootstrap "$file"
+  if test ! -f "$file" || ! grep -Fqx "$start" "$file"; then
+    return
+  fi
+  if test "$dry_run" -eq 1; then
+    say "Would remove legacy orchestrating-subagents bootstrap block from $file"
+    return
   fi
 
-  awk -v start="$start" -v end="$end" -v bootstrap="$bootstrap" '
+  directory="$(dirname "$file")"
+  new="$(mktemp "$directory/.orchestrating-subagents.XXXXXX")"
+  cp -p "$file" "$new"
+
+  awk -v start="$start" -v end="$end" '
     $0 == start {
-      if (!replaced) {
-        print start
-        print bootstrap
-        print end
-        replaced=1
-      }
       skipping=1
       next
     }
     skipping && $0 == end { skipping=0; next }
     skipping { next }
     { print }
-    END {
-      if (!replaced) {
-        if (NR > 0) print ""
-        print start
-        print bootstrap
-        print end
-      }
-    }
-  ' "$input" > "$new"
+  ' "$file" > "$new"
 
-  if test -f "$file" && cmp -s "$file" "$new"; then
-    rm -f "$new"
-    return
-  fi
-  if test -f "$file"; then
-    backup="$file.orchestrating-subagents.bak"
-    suffix=1
-    while test -e "$backup" || test -L "$backup"; do
-      backup="$file.orchestrating-subagents.bak.$suffix"
-      suffix=$((suffix + 1))
-    done
-    cp -p "$file" "$backup"
-  fi
+  backup="$file.orchestrating-subagents.bak"
+  suffix=1
+  while test -e "$backup" || test -L "$backup"; do
+    backup="$file.orchestrating-subagents.bak.$suffix"
+    suffix=$((suffix + 1))
+  done
+  cp -p "$file" "$backup"
   mv "$new" "$file"
 }
+
+if test "$install_codex" -eq 1; then
+  validate_legacy_bootstrap "$HOME/.codex/AGENTS.md"
+fi
+if test "$install_claude" -eq 1; then
+  validate_legacy_bootstrap "$HOME/.claude/CLAUDE.md"
+fi
 
 copy_canonical
 
 if test "$install_codex" -eq 1; then
   link_skill "$HOME/.agents/skills/orchestrating-subagents"
-  update_bootstrap "$HOME/.codex/AGENTS.md"
+  remove_legacy_bootstrap "$HOME/.codex/AGENTS.md"
   if test "$dry_run" -eq 0 && ! command -v codex >/dev/null 2>&1; then
     say 'Warning: codex executable not found; files were installed.' >&2
   fi
@@ -192,7 +185,7 @@ fi
 
 if test "$install_claude" -eq 1; then
   link_skill "$HOME/.claude/skills/orchestrating-subagents"
-  update_bootstrap "$HOME/.claude/CLAUDE.md"
+  remove_legacy_bootstrap "$HOME/.claude/CLAUDE.md"
   if test "$dry_run" -eq 0 && ! command -v claude >/dev/null 2>&1; then
     say 'Warning: claude executable not found; files were installed.' >&2
   fi
