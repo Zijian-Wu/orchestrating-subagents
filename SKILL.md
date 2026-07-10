@@ -1,11 +1,13 @@
 ---
 name: orchestrating-subagents
-description: Use when beginning or executing non-trivial coding work involving multiple steps, files, modules, unresolved uncertainty, substantial output, or distinct implementation and verification concerns
+description: Use only when the user explicitly invokes $orchestrating-subagents in Codex or /orchestrating-subagents in Claude Code
 ---
 
 # Orchestrating Subagents
 
 The main agent is the control plane. It owns planning, user communication, shared-file integration, final verification, and delivery; workers own bounded execution.
+
+Follow this skill only after the user explicitly invokes it by name. Do not apply it merely because a coding task is non-trivial or could benefit from subagents.
 
 ## Delegation check
 
