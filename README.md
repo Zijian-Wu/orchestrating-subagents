@@ -1,6 +1,6 @@
 # Orchestrating Subagents
 
-A cross-platform Agent Skill that makes Codex and Claude Code actively delegate non-trivial coding work while keeping the main agent responsible for planning, coordination, integration, verification, user communication, and final delivery.
+A manually invoked, cross-platform Agent Skill that makes Codex and Claude Code actively delegate non-trivial coding work while keeping the main agent responsible for planning, coordination, integration, verification, user communication, and final delivery.
 
 ## What it enforces
 
@@ -45,7 +45,13 @@ Restart Codex or Claude Code if the new skill is not detected in the current ses
 
 ## Manual use
 
-Codex can invoke the skill explicitly through its skill selector. In Claude Code, use:
+The skill is used only when you invoke it explicitly. For Codex, start the request with:
+
+```text
+$orchestrating-subagents
+```
+
+For Claude Code, start the request with:
 
 ```text
 /orchestrating-subagents
