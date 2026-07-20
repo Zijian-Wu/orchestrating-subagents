@@ -1,58 +1,29 @@
 # Orchestrating Subagents
 
-A manually invoked, cross-platform Agent Skill that makes Codex and Claude Code actively delegate non-trivial coding work while keeping the main agent responsible for planning, coordination, integration, verification, user communication, and final delivery.
+## Design philosophy
 
-## What it enforces
+Bring proactive subagent delegation to non-Ultra Codex while keeping the main agent clean, focused, and information-dense.
 
-- Delegate at least one substantive part of non-trivial coding tasks when subagents are available.
-- Run independent, non-overlapping work concurrently.
-- Give every worker explicit scope, ownership, acceptance criteria, and validation requirements.
-- Keep shared files and final integration under main-agent control.
-- Require an independent read-only reviewer for important changes.
-- Degrade transparently when subagent tools or capacity are unavailable.
-- Avoid unnecessary delegation for atomic, low-risk work.
+The main agent owns requirements, decisions, coordination, integration, and verification. Subagents handle bounded execution and noisy investigation, returning distilled results instead of raw working context. Ultra already provides native proactive delegation.
 
-## Repository layout
-
-```text
-.
-├── README.md
-├── SKILL.md
-├── install.sh
-└── adapters/
-    ├── codex.md
-    └── claude-code.md
-```
+One eligible bounded subtask is enough to delegate; parallelism is optional. The primary objective is context isolation, provided its value exceeds handoff and verification cost.
 
 ## Install
 
 ```bash
-git clone https://github.com/Zijian-Wu/orchestrating-subagents.git
-cd orchestrating-subagents
-
-bash install.sh --dry-run --all
-bash install.sh --all
+bash -o pipefail -c 'curl -fsSL https://raw.githubusercontent.com/Zijian-Wu/orchestrating-subagents/main/install.sh | bash'
 ```
 
-Install for one agent only:
+## Uninstall
 
 ```bash
-bash install.sh --codex
-bash install.sh --claude
+bash -o pipefail -c 'curl -fsSL https://raw.githubusercontent.com/Zijian-Wu/orchestrating-subagents/main/install.sh | bash -s -- --uninstall'
 ```
 
-Restart Codex or Claude Code if the new skill is not detected in the current session.
+## Use
 
-## Manual use
-
-The skill is used only when you invoke it explicitly. For Codex, start the request with:
+Codex can invoke the skill automatically. To force it for a task, use:
 
 ```text
 $orchestrating-subagents
-```
-
-For Claude Code, start the request with:
-
-```text
-/orchestrating-subagents
 ```
