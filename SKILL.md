@@ -1,6 +1,6 @@
 ---
 name: orchestrating-subagents
-description: Proactively orchestrate Codex subagents below Ultra to isolate work and keep the main agent clean, focused, and information-dense. Use implicitly when even one substantive bounded subtask can execute independently and return a distilled result, especially for codebase exploration, high-volume tools, tests, logs, clearly owned implementation, or independent review. Always use when explicitly invoked, or when the user requests subagents and the runtime is not explicitly Ultra. Do not use implicitly for Ultra, atomic or quick tasks, tightly coupled iterative work, or delegation whose handoff and verification cost outweighs its isolation value.
+description: Use proactively for most non-atomic Codex tasks below Ultra, including feature implementation, bug fixing, refactoring, code review, testing, research, documentation lookup, and repository exploration. Delegate every eligible bounded subtask—even a single one—to keep the main agent clean, focused, and information-dense. Use when explicitly invoked or requested by applicable AGENTS.md guidance. Do not use for Ultra, atomic or quick tasks, tightly coupled iterative work, or delegation whose handoff and verification cost outweighs its isolation value.
 ---
 
 # Orchestrating Subagents
@@ -9,9 +9,9 @@ Design around one principle: delegate every eligible bounded subtask to protect 
 
 ## Entry gates
 
-1. Always apply when the user explicitly invokes `$orchestrating-subagents`.
-2. Otherwise, stop when the runtime explicitly identifies Ultra; let Ultra orchestrate natively. Do not infer Ultra from the model name alone.
-3. When not explicitly Ultra, delegate when at least one substantive bounded subtask is eligible. Do not require a second ready task or concurrent main-agent work; one isolated subagent is sufficient.
+1. Stop when the runtime explicitly identifies Ultra; let Ultra orchestrate natively, even if this skill was invoked. Do not infer Ultra from the model name alone.
+2. Otherwise, apply when the user explicitly invokes `$orchestrating-subagents`, applicable `AGENTS.md` guidance requests it, or implicit matching selects it.
+3. Delegate when at least one substantive bounded subtask is eligible. Do not require a second ready task or concurrent main-agent work; one isolated subagent is sufficient.
 
 A subtask is eligible when it can be given a clear objective, boundary, deliverable, and validation; can proceed without frequent interaction; can return a distilled result instead of a raw trace; and its context-isolation, specialization, or review value exceeds handoff and verification cost. Strong signals include:
 

@@ -1,6 +1,6 @@
 interface:
   display_name: "Orchestrate Subagents"
-  short_description: "Context-first subagents below Ultra"
+  short_description: "Default subagent orchestration below Ultra"
   default_prompt: "Use $orchestrating-subagents to delegate every eligible bounded subtask—even a single one—while keeping the main agent clean and focused."
 
 policy:
